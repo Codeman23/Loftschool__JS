@@ -75,13 +75,9 @@ function returnCounter(number) {
  */
 
 function returnArgumentsArray() {
-    let newArray = [];
+    let args = Array.from(arguments);
 
-    for (var i = 0; i < arguments.length; i++) {
-        newArray [i] = arguments[i];
-    }
-
-    return newArray;
+    return args;
 }
 
 /*
@@ -99,7 +95,9 @@ function returnArgumentsArray() {
 
    console.log(newSum()) выведет 6
  */
-function bindFunction(fn) {
+
+function bindFunction(fn, ...args) {
+    return () => fn(...args);
 }
 
 export {
