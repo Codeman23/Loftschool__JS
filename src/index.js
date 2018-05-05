@@ -111,14 +111,6 @@ function createProxy(obj) {
     });
 }
 
-/*const createProxy = obj => new Proxy(obj, {
-    set(obj, prop, value) {
-        obj[prop] = value * value;
-
-        return true;
-    }
-});*/
-
 export {
     forEach,
     map,
