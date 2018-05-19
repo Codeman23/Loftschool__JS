@@ -154,8 +154,41 @@ function deleteTextNodesRecursive(where) {
  texts: 3
  }
  */
-function collectDOMStat(root) {
+
+function collectDOMStat(root, result) {
+    if (result == undefined) {
+        result = {
+            tags: {},
+            classes: {},
+            texts: 0
+        };
+    }
+
+    for (const child of root.childNodes) {
+        if (child.nodeType == Node.TEXT_NODE) {
+            result.texts++;
+        } else {
+            if (result.tags[child.tagName] == undefined) {
+                result.tags[child.tagName] = 0;
+            }
+            result.tags[child.tagName]++;
+
+            let classes = child.classList;
+
+            for (const className of classes) {
+                if (result.classes[className] == undefined) {
+                    result.classes[className] = 0;
+                }
+                result.classes[className]++;
+            }
+
+        }
+        collectDOMStat(child, result);
+    }
+
+    return result;
 }
+
 
 /*
  Задание 8 *:
@@ -190,6 +223,40 @@ function collectDOMStat(root) {
  }
  */
 function observeChildNodes(where, fn) {
+    let obj = {
+        type: '',
+        nodes: []
+    };
+
+    const observer = new MutationObserver(function (mutations) {
+
+        mutations.forEach(function(mutation) {
+            let insertedNodes = [];
+            let deletedNodes = [];
+
+            for (let i = 0; i < mutation.addedNodes.length; i++) {
+                insertedNodes.push(mutation.addedNodes[i]);
+            }
+            for (let i = 0; i < mutation.removedNodes.length; i++) {
+                deletedNodes.push(mutation.removedNodes[i]);
+            }
+            if (insertedNodes.length != 0) {
+                obj.type = 'insert';
+                obj.nodes = insertedNodes;
+                fn(obj);
+            } else if (deletedNodes.length != 0) {
+                obj.type = 'remove';
+                obj.nodes = deletedNodes;
+                fn(obj);
+            }
+        });
+
+    });
+
+    observer.observe(where, {
+        childList: true,
+        subtree: true
+    });
 }
 
 export {
