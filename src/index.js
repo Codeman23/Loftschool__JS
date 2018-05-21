@@ -156,6 +156,7 @@ function deleteTextNodesRecursive(where) {
  */
 
 function collectDOMStat(root, result) {
+
     if (result == undefined) {
         result = {
             tags: {},
@@ -164,31 +165,41 @@ function collectDOMStat(root, result) {
         };
     }
 
-    for (const child of root.childNodes) {
-        if (child.nodeType == Node.TEXT_NODE) {
-            result.texts++;
-        } else {
-            if (result.tags[child.tagName] == undefined) {
-                result.tags[child.tagName] = 0;
-            }
-            result.tags[child.tagName]++;
+    let nodes = root.childNodes;
 
-            let classes = child.classList;
+    for (let i = 0; i < nodes.length; i++) {
 
-            for (const className of classes) {
-                if (result.classes[className] == undefined) {
-                    result.classes[className] = 0;
+        if (nodes[i].classList) {
+            for (let y = 0; y < nodes[i].classList.length; y++) {
+                let className = nodes[i].classList[y];
+
+                if (result.classes.hasOwnProperty(className)) {
+                    result.classes[className]++;
+                } else {
+                    result.classes[className] = 1;
                 }
-                result.classes[className]++;
             }
-
         }
-        collectDOMStat(child, result);
+
+        if (nodes[i].children) {
+            let name = nodes[i].nodeName;
+
+            if (result.tags.hasOwnProperty(name)) {
+                result.tags[name]++;
+            } else {
+                result.tags[name] = 1;
+            }
+        }
+
+        if (nodes[i].nodeType == 3) {
+            result.texts++;
+        }
+
+        collectDOMStat(nodes[i], result);
     }
 
     return result;
 }
-
 
 /*
  Задание 8 *:
@@ -231,22 +242,22 @@ function observeChildNodes(where, fn) {
     const observer = new MutationObserver(function (mutations) {
 
         mutations.forEach(function(mutation) {
-            let insertedNodes = [];
-            let deletedNodes = [];
+            let insertNodes = [];
+            let delNodes = [];
 
             for (let i = 0; i < mutation.addedNodes.length; i++) {
-                insertedNodes.push(mutation.addedNodes[i]);
+                insertNodes.push(mutation.addedNodes[i]);
             }
             for (let i = 0; i < mutation.removedNodes.length; i++) {
-                deletedNodes.push(mutation.removedNodes[i]);
+                delNodes.push(mutation.removedNodes[i]);
             }
-            if (insertedNodes.length != 0) {
+            if (insertNodes.length != 0) {
                 obj.type = 'insert';
-                obj.nodes = insertedNodes;
+                obj.nodes = insertNodes;
                 fn(obj);
-            } else if (deletedNodes.length != 0) {
+            } else if (delNodes.length != 0) {
                 obj.type = 'remove';
-                obj.nodes = deletedNodes;
+                obj.nodes = delNodes;
                 fn(obj);
             }
         });
