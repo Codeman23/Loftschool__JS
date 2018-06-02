@@ -83,10 +83,10 @@ function addListeners(target) {
             document.onmousemove = null;
             target.onmouseup = null;
         };
-
     };
 
     target.ondragstart = function () {
+        
         return false;
     };
 
